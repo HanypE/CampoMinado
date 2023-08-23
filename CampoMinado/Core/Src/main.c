@@ -45,6 +45,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+ char CampoMinado[4][4];
 
 /* USER CODE END PV */
 
@@ -54,13 +55,13 @@ static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
 
 void PiscaLed(); //ok
-void sorteio(); //ok
+char sorteio(); //ok
 void fim(); //ok
 void intermitente(); //ok
 void Buzzer(); //ok
 void Acerto(); //ok
 char VerificaColuna(); //ok
-char verificaLinha(); //ok
+char VerificaLinha(); //ok
 void LerCombinacao(); //ok
 
 
@@ -231,8 +232,6 @@ void fim() {
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0); //led 7
 	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, 0); //led 8
 
-	return comeco();
-
 }
 
 void intermitente() {
@@ -267,34 +266,36 @@ void Buzzer(){
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, 0);
 
 }
-void sorteio(){
+char sorteio(char *c){
 
 	//linha = i; coluna = j;
 
-	int CampoMinado [4][4];
 
 	for (int i = 0; i < 4; i++) {
 
 		for (int j = 0; j < 4; j++) {
-			CampoMinado[i][j] = 0;
+			CampoMinado[i][j] = '0';
 		}
 	}
+
 
 	for (int b = 0; b < 4; b++) {
 
 		int i = rand()%4;
 		int j = rand()%4;
 
-		if (CampoMinado[i][j] == 0) {
-			CampoMinado[i][j] = 1;
+		if (CampoMinado[i][j] == '0') {
+			CampoMinado[i][j] = '1';
 		}
 
 		else { b = b-1; }
 
+
+
 	}
 
+	c = &CampoMinado;
 	LerCombinacao();
-
 }
 
 void PiscaLed(){
@@ -326,7 +327,7 @@ void Acerto(){
 	LerCombinacao();
 }
 
-char VerificaColuna(char *pr_c) {
+char VerificaColuna(char *p) {
 
 	//leitura coluna
 	int coluna1 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_7);
@@ -340,34 +341,38 @@ char VerificaColuna(char *pr_c) {
 	int linha3 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_14);
 	int linha4 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_13);
 
-	char coluna;
-	char linha;
+	char coluna = 'X';
 
-	if (coluna1 == 1) {
-		 coluna = "1";
+
+	if (coluna1 == 1)
+	{
+		 coluna = '1';
 	}
-	else if (coluna2 == 1) {
-		coluna = "2";
+	else if (coluna2 == 1)
+	{
+		coluna = '2';
 	}
 
-	else if (coluna3 == 1) {
-		coluna = "3";
+	else if (coluna3 == 1)
+	{
+		coluna = '3';
 	}
-	else if (coluna4 == 1) {
-		coluna = "4";
+	else if (coluna4 == 1)
+	{
+		coluna = '4';
 	}
-	else { coluna = "X";
-		   linha = "X"; }
+	else
+	{
+		coluna = 'X';
+	}
 
-	char *pr_coluna;
-	pr_coluna = &coluna;
-	return pr_coluna;
+	p = &coluna;
 
 }
 
-char VerificaLinha(*pr_l){
+char VerificaLinha(char *p){
 
-	char linha = "x";
+	char linha = 'x';
 
 	//leitura linha
 		int linha1 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_3);
@@ -375,41 +380,55 @@ char VerificaLinha(*pr_l){
 		int linha3 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_14);
 		int linha4 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_13);
 
-		if (linha1 == 1) {
-			linha = "1";
+		if (linha1 == 1)
+		{
+			linha = '1';
 		}
 
-		else if (linha2 == 1) {
-			linha = "2";
+		else if (linha2 == 1)
+		{
+			linha = '2';
 		}
 
-		else if (linha3 == 1) {
-			linha = "3";
+		else if (linha3 == 1)
+		{
+			linha = '3';
 		}
 
-		else if (linha4 == 1) {
-			linha = "4";
+		else if (linha4 == 1)
+		{
+			linha = '4';
 		}
 
-		*pr_linha = linha;
-		pr_linha = &linha;
-		return pr_linha;
+		p = &linha;
+
 }
 
 void LerCombinacao(){
 
-	char *pr_l;
-	char *pr_c;
-	VerificaColuna(*pr_c);
-	VerificaLinha(*pr_l);
+	char combinacao[3];
+	char CampoMinado[4][4];
 
-	if (CampoMinado[*pr_c][*pr_l] == 1) {
+
+	VerificaColuna(combinacao[0]);
+	VerificaLinha(combinacao[1]);
+
+	char coluna = combinacao[0];
+	char linha = combinacao [1];
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++){
+			sorteio(CampoMinado[i][j]);
+		}
+	}
+
+	if(CampoMinado[coluna][linha] == 1) {
 		fim();
 	}
-	else if(*pr_c == "X" || *pr_l == "X") {
-		LerCombinacao();
+	else if (CampoMinado[coluna][linha] == 0) {
+		Acerto();
 	}
-	else { Acerto();}
+	else { LerCombinacao(); }
 
 }
 
